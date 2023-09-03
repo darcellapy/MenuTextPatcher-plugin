@@ -5,13 +5,15 @@
 #include <notifications/notifications.h>
 
 #include "utils/logger.h"
+#include "config.h"
 #include "Notification.h"
 
 WUPS_PLUGIN_NAME("EasyAllMessageMod");
 WUPS_PLUGIN_DESCRIPTION("epik n ez way 2 replace AllMessage.szs with ur own 8) (help)");
-WUPS_PLUGIN_VERSION("v1.0");
+WUPS_PLUGIN_VERSION("v2.0");
 WUPS_PLUGIN_AUTHOR("Midn1ght");
 WUPS_PLUGIN_LICENSE("GPLv2");
+WUPS_USE_STORAGE("eamm");
 
 WUPS_USE_WUT_DEVOPTAB();
 
@@ -24,11 +26,21 @@ char mPath[128]= "";
 INITIALIZE_PLUGIN() {
     WHBLogUdpInit();
     WHBLogCafeInit();
+    Config::Init();
     
     if (NotificationModule_InitLibrary() != NOTIFICATION_MODULE_RESULT_SUCCESS) {
         DEBUG_FUNCTION_LINE("NotificationModule_InitLibrary failed :(");
     }
-        StartNotificationThread("AllMessage.szs patch enabled");
+    
+    if (Config::enable_allmessage_patch) {
+        if (Config::enable_notifications) {
+            StartNotificationThread("AllMessage.szs patch enabled");
+        }
+    } else {
+        if (Config::enable_notifications) {
+            StartNotificationThread("AllMessage.szs patch disabled");
+        }
+    }
 }
 
 DEINITIALIZE_PLUGIN() {
@@ -44,7 +56,7 @@ ON_APPLICATION_START() {
 }
 
 DECL_FUNCTION(FSStatus, FSOpenFile, FSClient *client, FSCmdBlock *block, const char *path, const char *mode, FSFileHandle *handle, FSErrorFlag errorMask) {
-    if (true) {
+    if (Config::enable_allmessage_patch) {
         if (strcmp(ALLMESSAGE_PATH, path) == 0) {
             FSGetMountSource(client, block, FS_MOUNT_SOURCE_SD, &mSource, FS_ERROR_FLAG_ALL);
             FSMount(client, block, &mSource, mPath, sizeof(mPath), FS_ERROR_FLAG_ALL);

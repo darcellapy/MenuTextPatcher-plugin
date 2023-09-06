@@ -8,7 +8,7 @@
 #include <wups/config/WUPSConfigItemBoolean.h>
 #include <wups/config/WUPSConfigItemStub.h>
 
-bool Config::enable_allmessage_patch = true;
+bool Config::enable_message_patch = true;
 bool Config::enable_notifications = true;
 bool needRelaunch = false;
 
@@ -19,9 +19,9 @@ void Config::Init() {
     }
     else {
         // Try to get value from storage
-        if ((storageRes = WUPS_GetBool(nullptr, "enable_allmessage_patch", &enable_allmessage_patch)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
+        if ((storageRes = WUPS_GetBool(nullptr, "enable_message_patch", &enable_message_patch)) == WUPS_STORAGE_ERROR_NOT_FOUND) {
             // Add the value to the storage if it's missing.
-            if (WUPS_StoreBool(nullptr, "enable_allmessage_patch", enable_allmessage_patch) != WUPS_STORAGE_ERROR_SUCCESS) {
+            if (WUPS_StoreBool(nullptr, "enable_message_patch", enable_message_patch) != WUPS_STORAGE_ERROR_SUCCESS) {
                 DEBUG_FUNCTION_LINE("Failed to store bool");
             }
         }
@@ -42,12 +42,12 @@ void Config::Init() {
     }
 }
 
-static void enable_allmessage_patch_changed(ConfigItemBoolean *item, bool new_value) {
-    DEBUG_FUNCTION_LINE("New value in enable_allmessage_patch_changed: %d", new_value);
+static void enable_message_patch_changed(ConfigItemBoolean *item, bool new_value) {
+    DEBUG_FUNCTION_LINE("New value in enable_message_patch_changed: %d", new_value);
     
-    Config::enable_allmessage_patch = new_value;
+    Config::enable_message_patch = new_value;
     needRelaunch = true;
-    WUPS_StoreBool(nullptr, "enable_allmessage_patch", Config::enable_allmessage_patch);
+    WUPS_StoreBool(nullptr, "enable_message_patch", Config::enable_message_patch);
 }
 
 static void enable_notifications_changed(ConfigItemBoolean *item, bool new_value) {
@@ -66,12 +66,12 @@ WUPS_GET_CONFIG() {
     }
 
     WUPSConfigHandle config;
-    WUPSConfig_CreateHandled(&config, "EasyAllMessageMod");
+    WUPSConfig_CreateHandled(&config, "MenuTextPatcher");
 
     WUPSConfigCategoryHandle cat;
     WUPSConfig_AddCategoryByNameHandled(config, "Patching", &cat);
 
-    WUPSConfigItemBoolean_AddToCategoryHandled(config, cat, "Patch AllMessage.szs", "Patch AllMessage.szs with your own", Config::enable_allmessage_patch, &enable_allmessage_patch_changed);
+    WUPSConfigItemBoolean_AddToCategoryHandled(config, cat, "Enable text patching", "Enable text patching", Config::enable_message_patch, &enable_message_patch_changed);
     WUPSConfigItemBoolean_AddToCategoryHandled(config, cat, "Toggle Notifications", "Toggle Notifications", Config::enable_notifications, &enable_notifications_changed);
 
     return config;

@@ -6,7 +6,7 @@ public:
     static void Init();
 
     // wups config items
-    static bool enable_allmessage_patch;
+    static bool enable_message_patch;
     static bool enable_notifications;
 };
 
